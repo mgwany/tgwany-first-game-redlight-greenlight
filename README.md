@@ -1,2 +1,26 @@
-# tgwany-first-game-redlight-greenlight
-First game created with GenAI (ChatGPT) - RedLIght GreenLight
+# Red Light, Green Light
+
+First game created with GenAI (ChatGPT) — now a mobile-friendly web game.
+
+## Play
+
+Open `index.html` in a browser, or serve the folder locally:
+
+```bash
+python3 -m http.server 8000 --bind 127.0.0.1
+```
+
+Then visit `http://127.0.0.1:8000`.
+
+## Controls
+
+- **Tap or click** the game screen to move toward the finish line.
+- Hold to keep moving.
+- **Don't move on RED.**
+- When the round ends, **tap or click** to play again.
+
+No keyboard is required. Works with mouse and touch on phones.
+
+## Notes
+
+The original desktop Java version (`RedLightGreenLightGame.java`) used arrow keys to move and `R` to restart. The web app replaces those with tap/click and is laid out for mobile browsers (viewport meta, full-screen usable layout, touch-action / scroll prevention, PWA manifest + optional service worker).
