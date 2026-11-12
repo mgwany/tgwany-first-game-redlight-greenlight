@@ -17,6 +17,7 @@ Then visit `http://127.0.0.1:8000`.
 - **Tap or click** the game screen to move toward the finish line.
 - Hold to keep moving.
 - **Don't move on RED.**
+- Each level has a **1-minute countdown**. Reach the finish before time runs out.
 - When the round ends, **tap or click** to play again.
 
 No keyboard is required. Works with mouse and touch on phones.

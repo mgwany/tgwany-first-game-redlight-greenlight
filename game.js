@@ -19,11 +19,17 @@
   const PLAYER_SIZE = 24;
   const MOVE_STEP = 10;
   const MOVE_INTERVAL_MS = 55;
+  const LEVEL_TIME_MS = 60_000;
 
   const LightState = Object.freeze({
     GREEN: "GREEN",
     YELLOW: "YELLOW",
     RED: "RED",
+  });
+
+  const LoseReason = Object.freeze({
+    RED: "RED",
+    TIMEOUT: "TIMEOUT",
   });
 
   const state = {
@@ -34,8 +40,10 @@
     lightState: LightState.GREEN,
     gameOver: false,
     playerWon: false,
+    loseReason: null,
     startTimeMs: 0,
     endTimeMs: 0,
+    remainingMs: LEVEL_TIME_MS,
     currentLevel: 1,
     yellowDuration: 500,
     moving: false,
@@ -43,6 +51,20 @@
     lightTimerId: 0,
     yellowTimerId: 0,
   };
+
+  function formatCountdown(ms) {
+    const totalSeconds = Math.max(0, Math.ceil(ms / 1000));
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes}:${String(seconds).padStart(2, "0")}`;
+  }
+
+  function getRemainingMs(now = performance.now()) {
+    if (state.gameOver) {
+      return Math.max(0, state.remainingMs);
+    }
+    return Math.max(0, LEVEL_TIME_MS - (now - state.startTimeMs));
+  }
 
   function clamp(v, min, max) {
     return Math.max(min, Math.min(max, v));
@@ -83,9 +105,9 @@
 
   function updateHud() {
     levelLabel.textContent = `Level ${state.currentLevel}`;
-    const now = performance.now();
-    const elapsedMs = (state.gameOver ? state.endTimeMs : now) - state.startTimeMs;
-    timeLabel.textContent = `Time: ${(elapsedMs / 1000).toFixed(1)}s`;
+    const remainingMs = getRemainingMs();
+    timeLabel.textContent = `Time: ${formatCountdown(remainingMs)}`;
+    timeLabel.classList.toggle("urgent", !state.gameOver && remainingMs <= 10_000);
 
     if (state.gameOver) {
       hint.textContent = "Tap the screen to play again.";
@@ -106,12 +128,16 @@
 
     if (state.gameOver) {
       overlay.classList.remove("hidden");
-      overlayTitle.textContent = state.playerWon
-        ? "You Win! Level Up!"
-        : "You moved on RED! Game Over";
-      overlaySub.textContent = state.playerWon
-        ? `Next Level: ${state.currentLevel} — Tap the screen to play!`
-        : "Tap the screen to try again.";
+      if (state.playerWon) {
+        overlayTitle.textContent = "You Win! Level Up!";
+        overlaySub.textContent = `Next Level: ${state.currentLevel} — Tap the screen to play!`;
+      } else if (state.loseReason === LoseReason.TIMEOUT) {
+        overlayTitle.textContent = "Time's Up! Game Over";
+        overlaySub.textContent = "Tap the screen to try again.";
+      } else {
+        overlayTitle.textContent = "You moved on RED! Game Over";
+        overlaySub.textContent = "Tap the screen to try again.";
+      }
     } else {
       overlay.classList.add("hidden");
     }
@@ -141,10 +167,16 @@
     }, nextInterval);
   }
 
-  function endGame(won) {
+  function endGame(won, reason = null) {
+    if (state.gameOver) return;
+
+    const now = performance.now();
+    const remainingMs = Math.max(0, LEVEL_TIME_MS - (now - state.startTimeMs));
     state.gameOver = true;
     state.playerWon = won;
-    state.endTimeMs = performance.now();
+    state.loseReason = won ? null : reason;
+    state.endTimeMs = now;
+    state.remainingMs = remainingMs;
     state.moving = false;
     clearTimers();
 
@@ -162,8 +194,10 @@
     state.lightState = LightState.GREEN;
     state.gameOver = false;
     state.playerWon = false;
+    state.loseReason = null;
     state.startTimeMs = performance.now();
     state.endTimeMs = 0;
+    state.remainingMs = LEVEL_TIME_MS;
     state.moving = false;
     state.lastMoveAt = 0;
     scheduleNextLightSwitch();
@@ -174,7 +208,7 @@
     if (state.gameOver) return;
 
     if (state.lightState === LightState.RED) {
-      endGame(false);
+      endGame(false, LoseReason.RED);
       return;
     }
 
@@ -269,6 +303,10 @@
   }
 
   function frame(now) {
+    if (!state.gameOver && getRemainingMs(now) <= 0) {
+      endGame(false, LoseReason.TIMEOUT);
+    }
+
     if (state.moving && !state.gameOver) {
       if (now - state.lastMoveAt >= MOVE_INTERVAL_MS) {
         state.lastMoveAt = now;
