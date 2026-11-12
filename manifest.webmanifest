@@ -1,7 +1,7 @@
 {
-  "name": "Red Light, Green Light",
-  "short_name": "RLGL",
-  "description": "Tap the screen to move. Don't move on red. Reach the finish line!",
+  "name": "Theo's Red Light Green Light Game",
+  "short_name": "Theo's RLGL",
+  "description": "Theo's Red Light Green Light Game — tap the screen to move. Don't move on red. Reach the finish line!",
   "start_url": "./index.html",
   "display": "standalone",
   "orientation": "any",

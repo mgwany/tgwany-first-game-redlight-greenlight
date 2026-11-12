@@ -1,4 +1,4 @@
-const CACHE = "rlgl-v1";
+const CACHE = "rlgl-v2";
 const ASSETS = [
   "./",
   "./index.html",

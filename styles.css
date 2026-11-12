@@ -52,6 +52,16 @@ body {
   gap: 0.6rem;
 }
 
+.game-title {
+  margin: 0 0 0.35rem;
+  font-size: clamp(1.05rem, 4.2vw, 1.35rem);
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+  text-align: center;
+  color: var(--text);
+}
+
 .hud-row {
   display: flex;
   justify-content: space-between;
@@ -179,6 +189,11 @@ body {
     padding: calc(0.4rem + var(--safe-top)) calc(0.6rem + var(--safe-right))
       calc(0.4rem + var(--safe-bottom)) calc(0.6rem + var(--safe-left));
     gap: 0.35rem;
+  }
+
+  .game-title {
+    margin-bottom: 0.2rem;
+    font-size: clamp(0.95rem, 3.5vw, 1.15rem);
   }
 
   .hint {

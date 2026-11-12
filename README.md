@@ -1,4 +1,4 @@
-# Red Light, Green Light
+# Theo's Red Light Green Light Game
 
 First game created with GenAI (ChatGPT) — now a mobile-friendly web game.
 
