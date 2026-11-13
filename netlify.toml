@@ -1,0 +1,20 @@
+[build]
+  publish = "."
+  # No build step — static HTML/CSS/JS plus Netlify Functions.
+  command = "npm install"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+# Friendly alias matching the old API path (optional).
+[[redirects]]
+  from = "/api/highscores"
+  to = "/.netlify/functions/highscores"
+  status = 200
+  force = true
+
+[[headers]]
+  for = "/.netlify/functions/*"
+  [headers.values]
+    Cache-Control = "no-store"
