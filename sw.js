@@ -1,4 +1,4 @@
-const CACHE = "rlgl-v1";
+const CACHE = "rlgl-v3";
 const ASSETS = [
   "./",
   "./index.html",
@@ -23,6 +23,13 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   const req = event.request;
+  const url = new URL(req.url);
+
+  // Never cache the high-score API or the on-disk score file.
+  if (url.pathname.startsWith("/api/") || url.pathname.endsWith("/highscore.txt")) {
+    return;
+  }
+
   if (req.method !== "GET") return;
   event.respondWith(
     caches.match(req).then((cached) => {
