@@ -31,6 +31,7 @@
   const MAX_LIVES = 10;
   const BASE_YELLOW_DURATION = 500;
   const MAX_HIGH_SCORES = 10;
+  const HIGH_SCORE_API = "/.netlify/functions/highscores";
   // Optional `?lives=1` (1–10) for quick local demos; default remains 10.
   const livesParam = Number.parseInt(
     new URLSearchParams(location.search).get("lives") || "",
@@ -131,7 +132,7 @@
 
     if (state.scoresOffline) {
       highScoreStatus.textContent =
-        "Score server offline — run `node server.js` to save highscore.txt.";
+        "Score API offline — deploy on Netlify or run `npm run dev` (netlify dev).";
     } else if (!highScoreStatus.dataset.sticky) {
       highScoreStatus.textContent = "";
     }
@@ -139,7 +140,7 @@
 
   async function loadHighScores() {
     try {
-      const res = await fetch("/api/highscores", { cache: "no-store" });
+      const res = await fetch(HIGH_SCORE_API, { cache: "no-store" });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       state.highScores = Array.isArray(data.scores) ? data.scores : [];
@@ -154,7 +155,7 @@
   }
 
   async function submitHighScore(name, level) {
-    const res = await fetch("/api/highscores", {
+    const res = await fetch(HIGH_SCORE_API, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, level }),

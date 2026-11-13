@@ -1,4 +1,4 @@
-const CACHE = "rlgl-v3";
+const CACHE = "rlgl-v4";
 const ASSETS = [
   "./",
   "./index.html",
@@ -25,8 +25,12 @@ self.addEventListener("fetch", (event) => {
   const req = event.request;
   const url = new URL(req.url);
 
-  // Never cache the high-score API or the on-disk score file.
-  if (url.pathname.startsWith("/api/") || url.pathname.endsWith("/highscore.txt")) {
+  // Never cache high-score Functions / API aliases.
+  if (
+    url.pathname.startsWith("/.netlify/functions/") ||
+    url.pathname.startsWith("/api/") ||
+    url.pathname.endsWith("/highscore.txt")
+  ) {
     return;
   }
 

@@ -1,0 +1,2 @@
+# Format example (production board is Netlify Blobs key "highscore.txt"):
+# name,level

@@ -1,0 +1,15 @@
+{
+  "name": "tgwany-first-game-redlight-greenlight",
+  "private": true,
+  "description": "Red Light, Green Light — mobile web game with Netlify Functions high scores",
+  "scripts": {
+    "dev": "npx --yes netlify-cli dev",
+    "build": "echo 'Static site — Netlify publishes the repo root'"
+  },
+  "dependencies": {
+    "@netlify/blobs": "^11.1.9"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

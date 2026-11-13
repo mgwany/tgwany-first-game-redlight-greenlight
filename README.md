@@ -1,22 +1,34 @@
 # Red Light, Green Light
 
-First game created with GenAI (ChatGPT) — now a mobile-friendly web game.
+First game created with GenAI (ChatGPT) — now a mobile-friendly web game hosted on **Netlify**.
 
 ## Play (with high scores)
 
-High scores are stored in a local `highscore.txt` file. Browsers cannot write that file directly, so run the tiny Node server (serves the game **and** reads/writes scores):
+High scores use a **Netlify Function** plus **Netlify Blobs**. Lambda/Functions disk is ephemeral, so the live board is stored in Blobs under key `highscore.txt` using the same comma-delimited CSV shape as the repo example file.
+
+### Deploy on Netlify
+
+1. Connect this repo to a Netlify site (publish directory = site root).
+2. Netlify runs `npm install` (see `netlify.toml`) and publishes static files + `netlify/functions`.
+3. Open the site URL — the HIGH SCORE panel loads from `/.netlify/functions/highscores`.
+
+No `node server.js`. No cloud database beyond Netlify Blobs (included with the site).
+
+### Local development
 
 ```bash
-node server.js
+npm install
+npm run dev
+# → netlify dev (serves the site + Functions; link a Netlify site for Blobs)
 ```
 
-Then visit `http://127.0.0.1:8000`.
+Then open the URL printed by the CLI (usually `http://localhost:8888`).
 
-Optional env vars: `PORT` (default `8000`), `HOST` (default `127.0.0.1`).
+If Functions/Blobs are unavailable (plain `file://` or a static-only server), the game still plays; the HIGH SCORE panel shows an offline message and cannot persist.
 
-### `highscore.txt` format
+### Score format (`highscore.txt`)
 
-Comma-delimited CSV, one entry per line:
+Comma-delimited CSV, one entry per line (repo file is the format example / empty seed; production data lives in Blobs):
 
 ```text
 name,level
@@ -29,12 +41,12 @@ Mina,5
 - **Tie-break:** equal levels keep the **earlier** entry ranked higher (new ties insert after existing same-level scores).
 - Names are trimmed, commas stripped, max 20 characters.
 
-API used by the game:
+### API
 
-- `GET /api/highscores` — load the board
-- `POST /api/highscores` with JSON `{ "name": "Ada", "level": 7 }` — submit if it qualifies
+- `GET /.netlify/functions/highscores` — load the board  
+- `POST /.netlify/functions/highscores` with JSON `{ "name": "Ada", "level": 7 }` — submit if it qualifies  
 
-Opening `index.html` as a file (or a plain static server without `server.js`) still plays, but the HIGH SCORE panel cannot persist to disk.
+`/api/highscores` is redirected to the same Function (`netlify.toml`) for convenience.
 
 ## Controls
 
