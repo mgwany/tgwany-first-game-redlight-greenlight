@@ -18,7 +18,9 @@ Then visit `http://127.0.0.1:8000`.
 - Hold to keep moving.
 - **Don't move on RED.**
 - Each level has a **1-minute countdown**. Reach the finish before time runs out.
-- When the round ends, **tap or click** to play again.
+- You start with **10 lives**. Moving on RED or running out of time costs 1 life.
+- After a life loss, **tap or click** to retry the same level (lives carry across wins).
+- At **0 lives**, the run ends — tap to restart from Level 1 with 10 lives again.
 
 No keyboard is required. Works with mouse and touch on phones.
 

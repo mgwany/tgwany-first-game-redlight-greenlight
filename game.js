@@ -8,6 +8,7 @@
   const overlayTitle = document.getElementById("overlayTitle");
   const overlaySub = document.getElementById("overlaySub");
   const levelLabel = document.getElementById("levelLabel");
+  const livesLabel = document.getElementById("livesLabel");
   const timeLabel = document.getElementById("timeLabel");
   const hint = document.getElementById("hint");
   const lightLabel = document.getElementById("lightLabel");
@@ -20,6 +21,8 @@
   const MOVE_STEP = 10;
   const MOVE_INTERVAL_MS = 55;
   const LEVEL_TIME_MS = 60_000;
+  const MAX_LIVES = 10;
+  const BASE_YELLOW_DURATION = 500;
 
   const LightState = Object.freeze({
     GREEN: "GREEN",
@@ -41,11 +44,13 @@
     gameOver: false,
     playerWon: false,
     loseReason: null,
+    lives: MAX_LIVES,
+    needsFullRestart: false,
     startTimeMs: 0,
     endTimeMs: 0,
     remainingMs: LEVEL_TIME_MS,
     currentLevel: 1,
-    yellowDuration: 500,
+    yellowDuration: BASE_YELLOW_DURATION,
     moving: false,
     lastMoveAt: 0,
     lightTimerId: 0,
@@ -105,12 +110,20 @@
 
   function updateHud() {
     levelLabel.textContent = `Level ${state.currentLevel}`;
+    livesLabel.textContent = `Lives: ${state.lives}`;
+    livesLabel.classList.toggle("critical", state.lives <= 3);
     const remainingMs = getRemainingMs();
     timeLabel.textContent = `Time: ${formatCountdown(remainingMs)}`;
     timeLabel.classList.toggle("urgent", !state.gameOver && remainingMs <= 10_000);
 
     if (state.gameOver) {
-      hint.textContent = "Tap the screen to play again.";
+      if (state.needsFullRestart) {
+        hint.textContent = "Out of lives — tap to restart from Level 1.";
+      } else if (state.playerWon) {
+        hint.textContent = "Tap the screen to play the next level.";
+      } else {
+        hint.textContent = "Life lost — tap to retry this level.";
+      }
     } else {
       hint.textContent =
         "Tap the screen to move. Don't move on RED. Reach the finish line!";
@@ -130,13 +143,26 @@
       overlay.classList.remove("hidden");
       if (state.playerWon) {
         overlayTitle.textContent = "You Win! Level Up!";
-        overlaySub.textContent = `Next Level: ${state.currentLevel} — Tap the screen to play!`;
+        overlaySub.textContent = `Next Level: ${state.currentLevel} — Lives: ${state.lives}`;
+      } else if (state.needsFullRestart) {
+        overlayTitle.textContent = "Game Over — No Lives Left";
+        if (state.loseReason === LoseReason.TIMEOUT) {
+          overlaySub.textContent =
+            "Time ran out on your last life. Tap to restart from Level 1 with 10 lives.";
+        } else {
+          overlaySub.textContent =
+            "You moved on RED on your last life. Tap to restart from Level 1 with 10 lives.";
+        }
       } else if (state.loseReason === LoseReason.TIMEOUT) {
-        overlayTitle.textContent = "Time's Up! Game Over";
-        overlaySub.textContent = "Tap the screen to try again.";
+        overlayTitle.textContent = "Time's Up! −1 Life";
+        overlaySub.textContent = `${state.lives} ${
+          state.lives === 1 ? "life" : "lives"
+        } left — tap to retry this level.`;
       } else {
-        overlayTitle.textContent = "You moved on RED! Game Over";
-        overlaySub.textContent = "Tap the screen to try again.";
+        overlayTitle.textContent = "Moved on RED! −1 Life";
+        overlaySub.textContent = `${state.lives} ${
+          state.lives === 1 ? "life" : "lives"
+        } left — tap to retry this level.`;
       }
     } else {
       overlay.classList.add("hidden");
@@ -167,6 +193,13 @@
     }, nextInterval);
   }
 
+  function resetRunProgress() {
+    state.currentLevel = 1;
+    state.yellowDuration = BASE_YELLOW_DURATION;
+    state.lives = MAX_LIVES;
+    state.needsFullRestart = false;
+  }
+
   function endGame(won, reason = null) {
     if (state.gameOver) return;
 
@@ -183,11 +216,19 @@
     if (won) {
       state.currentLevel += 1;
       state.yellowDuration = Math.max(50, Math.floor(state.yellowDuration / 2));
+      state.needsFullRestart = false;
+    } else {
+      state.lives = Math.max(0, state.lives - 1);
+      state.needsFullRestart = state.lives <= 0;
     }
     updateHud();
   }
 
-  function startGame() {
+  function startGame({ fullRestart = false } = {}) {
+    if (fullRestart) {
+      resetRunProgress();
+    }
+
     clearTimers();
     state.playerX = PADDING;
     state.playerY = state.height / 2 - PLAYER_SIZE / 2;
@@ -195,6 +236,7 @@
     state.gameOver = false;
     state.playerWon = false;
     state.loseReason = null;
+    state.needsFullRestart = false;
     state.startTimeMs = performance.now();
     state.endTimeMs = 0;
     state.remainingMs = LEVEL_TIME_MS;
@@ -233,7 +275,7 @@
   function onPointerDown(event) {
     event.preventDefault();
     if (state.gameOver) {
-      startGame();
+      startGame({ fullRestart: state.needsFullRestart });
       return;
     }
     state.moving = true;
