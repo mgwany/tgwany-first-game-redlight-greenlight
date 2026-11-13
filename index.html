@@ -27,14 +27,39 @@
       <p id="hint" class="hint">Tap the screen to move. Don't move on RED. Reach the finish line!</p>
     </header>
 
-    <main id="stage" class="stage" role="application" aria-label="Red Light Green Light game. Tap to move forward.">
-      <canvas id="game" width="800" height="500"></canvas>
-      <div id="overlay" class="overlay hidden" aria-live="assertive">
-        <p id="overlayTitle" class="overlay-title"></p>
-        <p id="overlaySub" class="overlay-sub"></p>
-        <p class="overlay-action">Tap the screen to continue</p>
-      </div>
-    </main>
+    <div class="play-layout">
+      <main id="stage" class="stage" role="application" aria-label="Red Light Green Light game. Tap to move forward.">
+        <canvas id="game" width="800" height="500"></canvas>
+        <div id="overlay" class="overlay hidden" aria-live="assertive">
+          <p id="overlayTitle" class="overlay-title"></p>
+          <p id="overlaySub" class="overlay-sub"></p>
+          <form id="nameForm" class="name-form hidden" autocomplete="off">
+            <label for="playerName" class="name-label">New high score! Enter your name</label>
+            <div class="name-row">
+              <input
+                id="playerName"
+                name="playerName"
+                type="text"
+                maxlength="20"
+                placeholder="Your name"
+                enterkeyhint="done"
+                required
+              />
+              <button type="submit" id="nameSubmit">Save</button>
+            </div>
+            <p id="nameError" class="name-error hidden" role="alert"></p>
+          </form>
+          <p id="overlayAction" class="overlay-action">Tap the screen to continue</p>
+        </div>
+      </main>
+
+      <aside id="highScorePanel" class="high-score-panel" aria-label="High scores">
+        <h2 class="high-score-title">HIGH SCORE</h2>
+        <ol id="highScoreList" class="high-score-list"></ol>
+        <p id="highScoreEmpty" class="high-score-empty">No scores yet — finish a run to claim a spot.</p>
+        <p id="highScoreStatus" class="high-score-status" aria-live="polite"></p>
+      </aside>
+    </div>
 
     <footer class="light-bar" aria-hidden="true">
       <div class="traffic-light" id="trafficLight">
