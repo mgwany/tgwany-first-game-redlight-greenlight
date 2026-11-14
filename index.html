@@ -10,7 +10,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="theme-color" content="#1a2332" />
-  <meta name="description" content="Red Light, Green Light — tap the screen to move. Don't move on red!" />
+  <meta name="description" content="Red Light, Green Light — tap or use arrow keys to move. Don't move on red!" />
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%231a2332'/%3E%3Ccircle cx='32' cy='18' r='8' fill='%23dc322f'/%3E%3Ccircle cx='32' cy='32' r='8' fill='%23fdcb6e'/%3E%3Ccircle cx='32' cy='46' r='8' fill='%232ecc40'/%3E%3C/svg%3E" />
   <title>Red Light, Green Light</title>
@@ -24,11 +24,11 @@
         <span id="livesLabel">Lives: 10</span>
         <span id="timeLabel">Time: 1:00</span>
       </div>
-      <p id="hint" class="hint">Tap the screen to move. Don't move on RED. Reach the finish line!</p>
+      <p id="hint" class="hint">Tap or use arrow keys to move. Don't move on RED. Reach the finish line!</p>
     </header>
 
     <div class="play-layout">
-      <main id="stage" class="stage" role="application" aria-label="Red Light Green Light game. Tap to move forward.">
+      <main id="stage" class="stage" role="application" aria-label="Red Light Green Light game. Tap or use arrow keys to move.">
         <canvas id="game" width="800" height="500"></canvas>
         <div id="overlay" class="overlay hidden" aria-live="assertive">
           <p id="overlayTitle" class="overlay-title"></p>

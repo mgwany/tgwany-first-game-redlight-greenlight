@@ -70,7 +70,8 @@
     currentLevel: 1,
     highestLevelReached: 1,
     yellowDuration: BASE_YELLOW_DURATION,
-    moving: false,
+    pointerHeld: false,
+    keysDown: new Set(),
     lastMoveAt: 0,
     lightTimerId: 0,
     yellowTimerId: 0,
@@ -244,7 +245,7 @@
       }
     } else {
       hint.textContent =
-        "Tap the screen to move. Don't move on RED. Reach the finish line!";
+        "Tap or use arrow keys to move. Don't move on RED. Reach the finish line!";
     }
 
     const labels = {
@@ -362,7 +363,7 @@
     state.loseReason = won ? null : reason;
     state.endTimeMs = now;
     state.remainingMs = remainingMs;
-    state.moving = false;
+    stopMovement();
     clearTimers();
 
     if (won) {
@@ -403,7 +404,7 @@
     state.startTimeMs = performance.now();
     state.endTimeMs = 0;
     state.remainingMs = LEVEL_TIME_MS;
-    state.moving = false;
+    stopMovement();
     state.lastMoveAt = 0;
     state.highestLevelReached = Math.max(
       state.highestLevelReached,
@@ -414,8 +415,32 @@
     updateHud();
   }
 
+  function stopMovement() {
+    state.pointerHeld = false;
+    state.keysDown.clear();
+  }
+
+  function getHeldMoveDelta() {
+    let dx = 0;
+    let dy = 0;
+    if (state.keysDown.has("ArrowLeft")) dx -= MOVE_STEP;
+    if (state.keysDown.has("ArrowRight")) dx += MOVE_STEP;
+    if (state.keysDown.has("ArrowUp")) dy -= MOVE_STEP;
+    if (state.keysDown.has("ArrowDown")) dy += MOVE_STEP;
+    // Tap/click keeps the original forward-only hold behavior for mobile.
+    if (state.pointerHeld && dx === 0 && dy === 0) {
+      dx = MOVE_STEP;
+    }
+    return { dx, dy };
+  }
+
+  function isMoving() {
+    return state.pointerHeld || state.keysDown.size > 0;
+  }
+
   function tryMove(dx, dy) {
     if (state.gameOver) return;
+    if (dx === 0 && dy === 0) return;
 
     if (state.lightState === LightState.RED) {
       endGame(false, LoseReason.RED);
@@ -440,6 +465,17 @@
     }
   }
 
+  function isTypingTarget(target) {
+    if (!target || !(target instanceof Element)) return false;
+    const tag = target.tagName;
+    return (
+      tag === "INPUT" ||
+      tag === "TEXTAREA" ||
+      tag === "SELECT" ||
+      target.isContentEditable
+    );
+  }
+
   function onPointerDown(event) {
     if (state.awaitingName) {
       // Let the name form receive taps; don't restart mid-prompt.
@@ -455,18 +491,56 @@
       startGame({ fullRestart: state.needsFullRestart });
       return;
     }
-    state.moving = true;
+    state.pointerHeld = true;
     state.lastMoveAt = 0;
     tryMove(MOVE_STEP, 0);
   }
 
   function onPointerUp(event) {
     event.preventDefault();
-    state.moving = false;
+    state.pointerHeld = false;
   }
 
   function onPointerCancel() {
-    state.moving = false;
+    state.pointerHeld = false;
+  }
+
+  function onKeyDown(event) {
+    if (state.awaitingName || isTypingTarget(event.target)) return;
+
+    const { key } = event;
+    if (
+      key !== "ArrowUp" &&
+      key !== "ArrowDown" &&
+      key !== "ArrowLeft" &&
+      key !== "ArrowRight"
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+    if (state.gameOver) return;
+    if (event.repeat) return;
+
+    state.keysDown.add(key);
+    state.lastMoveAt = 0;
+    const { dx, dy } = getHeldMoveDelta();
+    tryMove(dx, dy);
+  }
+
+  function onKeyUp(event) {
+    const { key } = event;
+    if (
+      key !== "ArrowUp" &&
+      key !== "ArrowDown" &&
+      key !== "ArrowLeft" &&
+      key !== "ArrowRight"
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+    state.keysDown.delete(key);
   }
 
   function drawGrid() {
@@ -526,10 +600,11 @@
       endGame(false, LoseReason.TIMEOUT);
     }
 
-    if (state.moving && !state.gameOver) {
+    if (isMoving() && !state.gameOver) {
       if (now - state.lastMoveAt >= MOVE_INTERVAL_MS) {
         state.lastMoveAt = now;
-        tryMove(MOVE_STEP, 0);
+        const { dx, dy } = getHeldMoveDelta();
+        tryMove(dx, dy);
       }
     }
     updateHud();
@@ -576,6 +651,9 @@
   stage.addEventListener("pointerleave", onPointerUp);
   stage.addEventListener("pointercancel", onPointerCancel);
   stage.addEventListener("contextmenu", (e) => e.preventDefault());
+  window.addEventListener("keydown", onKeyDown);
+  window.addEventListener("keyup", onKeyUp);
+  window.addEventListener("blur", stopMovement);
 
   document.addEventListener(
     "touchmove",
