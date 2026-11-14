@@ -50,8 +50,9 @@ Mina,5
 
 ## Controls
 
-- **Tap or click** the game screen to move toward the finish line.
-- Hold to keep moving.
+- **Tap or click** the game screen to move toward the finish line (mobile-friendly).
+- **Arrow keys** (↑ ↓ ← →) move in four directions on desktop. Hold a key to keep moving.
+- Hold tap/click to keep moving forward.
 - **Don't move on RED.**
 - Each level has a **1-minute countdown**. Reach the finish before time runs out.
 - You start with **10 lives**. Moving on RED or running out of time costs 1 life.
@@ -59,8 +60,8 @@ Mina,5
 - At **0 lives**, the run ends. If your highest level reached makes the top 10, enter your name; the HIGH SCORE list is on the right (stacks under the stage on narrow phones).
 - After that, tap to restart from Level 1 with 10 lives again.
 
-No keyboard is required for play (name entry uses the on-screen keyboard). Works with mouse and touch on phones.
+Works with mouse, touch, and keyboard arrows. Name entry uses the on-screen or hardware keyboard.
 
 ## Notes
 
-The original desktop Java version (`RedLightGreenLightGame.java`) used arrow keys to move and `R` to restart. The web app replaces those with tap/click and is laid out for mobile browsers (viewport meta, full-screen usable layout, touch-action / scroll prevention, PWA manifest + optional service worker).
+The original desktop Java version (`RedLightGreenLightGame.java`) used arrow keys to move and `R` to restart. The web app keeps tap/click for mobile and restores arrow-key movement for desktop (viewport meta, full-screen usable layout, touch-action / scroll prevention, PWA manifest + optional service worker).
